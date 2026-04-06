@@ -1,0 +1,226 @@
+/* --- GLOBAL APPLE DESIGN SYSTEM --- */
+:root {
+  --bg-color: #000000;
+  --card-bg: rgba(28, 28, 30, 0.6);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text-main: #ffffff;
+  --text-muted: #8e8e93;
+  --ios-blue: #0a84ff;
+  --ios-green: #30d158;
+  --ios-orange: #ff9f0a;
+  --ios-red: #ff3b30;
+  --ios-cyan: #32ade6;
+  --ios-teal: #00c7be;
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.apple-dashboard {
+  max-width: 1000px; /* Slightly wider to fit 4 cards nicely */
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* --- HEADER & SEGMENTED TABS --- */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.header-titles h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+  color: var(--text-muted);
+}
+
+.status-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.AUTO .dot { background-color: var(--ios-green); box-shadow: 0 0 8px var(--ios-green); }
+.status-indicator.MANUAL .dot { background-color: var(--ios-orange); box-shadow: 0 0 8px var(--ios-orange); }
+
+/* iOS Segmented Control */
+.segmented-control {
+  display: flex;
+  background: rgba(118, 118, 128, 0.24);
+  padding: 3px;
+  border-radius: 9px;
+}
+
+.segmented-control button {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 6px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.segmented-control button.active {
+  background: #636366;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
+}
+
+/* --- CARDS & LAYOUT --- */
+.apple-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 24px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.hover-effect {
+  transition: var(--transition-smooth);
+}
+
+.hover-effect:hover {
+  transform: translateY(-4px);
+  background: rgba(44, 44, 46, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 4-Column Layout for Sensors */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Responsive drop to 2 columns on smaller screens */
+@media (max-width: 800px) {
+  .metrics-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card-label {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+}
+
+.metrics-row h2 {
+  margin: 0;
+  font-size: 36px; /* Slightly smaller to fit 4 across */
+  font-weight: 600;
+  letter-spacing: -1px;
+}
+
+/* --- HARDWARE CONTROLS --- */
+.controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.controls-header h3 { margin: 0; font-weight: 600; }
+
+.mode-toggle {
+  background: #2c2c2e;
+  border: none;
+  color: var(--ios-blue);
+  padding: 8px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.mode-toggle:hover {
+  filter: brightness(1.2);
+  transform: scale(1.02);
+}
+
+/* Updated grid for 6 buttons (Lights + Pump/Fan) */
+.hardware-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.apple-btn {
+  padding: 20px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-align: center;
+}
+
+/* Hover States for Buttons */
+.apple-btn:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.01);
+}
+
+/* Active States (Solid Apple Colors) */
+.apple-btn.tungsten.active { background: var(--ios-orange); border-color: var(--ios-orange); color: #000; }
+.apple-btn.white.active    { background: #ffffff; border-color: #ffffff; color: #000; }
+.apple-btn.blue.active     { background: var(--ios-blue); border-color: var(--ios-blue); color: #fff; }
+.apple-btn.red.active      { background: var(--ios-red); border-color: var(--ios-red); color: #fff; }
+.apple-btn.pump.active     { background: var(--ios-cyan); border-color: var(--ios-cyan); color: #fff; }
+.apple-btn.fan.active      { background: var(--ios-teal); border-color: var(--ios-teal); color: #fff; }
+
+.apple-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.lock-text {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 20px 0 0 0;
+}
+
+/* --- ANALYTICS CHART --- */
+.chart-container h3 { margin: 0 0 20px 0; font-weight: 600; }
+.chart-wrapper { height: 400px; width: 100%; }
+
+/* Utilities */
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
