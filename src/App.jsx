@@ -6,12 +6,10 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Title, Tooltip, Legend
 } from 'chart.js';
-import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  baseURL: "https://unwitting-yong-aerogenically.ngrok-free.dev/v1",
-  apiKey: "lm-studio",
-});
+const apiBaseUrl = "https://unwitting-yong-aerogenically.ngrok-free.dev/v1";
+const apiKey = "lm-studio";
+const modelName = "llama-2-7b-chat"; // Update if your LM Studio model uses a different name
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -94,17 +92,32 @@ function App() {
     if (!chatInput.trim()) return;
 
     const userMessage = { role: 'user', content: chatInput };
+    const messagesToSend = [...chatMessages, userMessage];
     setChatMessages(prev => [...prev, userMessage]);
     setChatInput('');
 
     try {
-      const completion = await openai.chat.completions.create({
-        messages: [...chatMessages, userMessage],
-        temperature: 0.7,
-        max_tokens: 1000,
+      const response = await fetch(`${apiBaseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: messagesToSend,
+          temperature: 0.7,
+          max_tokens: 1000,
+        }),
       });
 
-      const aiMessage = { role: 'assistant', content: completion.choices[0].message.content };
+      if (!response.ok) {
+        throw new Error(`AI request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiText = data?.choices?.[0]?.message?.content || 'No response text available.';
+      const aiMessage = { role: 'assistant', content: aiText };
       setChatMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error:', error);
