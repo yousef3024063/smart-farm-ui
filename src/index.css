@@ -215,6 +215,80 @@ body {
 .chart-container h3 { margin: 0 0 20px 0; font-weight: 600; }
 .chart-wrapper { height: 400px; width: 100%; }
 
+/* --- AI CHAT --- */
+.chat-container h3 { margin: 0 0 20px 0; font-weight: 600; }
+
+.chat-messages {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.message {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.message.user {
+  background: var(--ios-blue);
+  margin-left: 50px;
+}
+
+.message.assistant {
+  background: rgba(255, 255, 255, 0.1);
+  margin-right: 50px;
+}
+
+.message-content {
+  word-wrap: break-word;
+}
+
+.chat-input-container {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  font-size: 16px;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--ios-blue);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.send-btn {
+  padding: 12px 24px;
+  border-radius: 20px;
+  background: var(--ios-blue);
+  border: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.send-btn:hover:not(:disabled) {
+  background: #0a7aff;
+  transform: scale(1.02);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Utilities */
 .fade-in {
   animation: fadeIn 0.4s ease forwards;

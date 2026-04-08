@@ -6,6 +6,12 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Title, Tooltip, Legend
 } from 'chart.js';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  baseURL: "https://unwitting-yong-aerogenically.ngrok-free.dev/v1",
+  apiKey: "lm-studio",
+});
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -28,6 +34,18 @@ function App() {
   const [history, setHistory] = useState({
     labels: [], temp: [], humidity: [], moisture: [], light: []
   });
+
+  // AI Chat state
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    const chatContainer = document.querySelector('.chat-messages');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [chatMessages]);
 
   // --- FIREBASE LISTENERS ---
   useEffect(() => {
@@ -69,6 +87,30 @@ function App() {
       : !controls[key];
     
     set(ref(db, `controls/${key}`), newValue);
+  };
+
+  // --- AI CHAT LOGIC ---
+  const sendMessage = async () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = { role: 'user', content: chatInput };
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+
+    try {
+      const completion = await openai.chat.completions.create({
+        messages: [...chatMessages, userMessage],
+        temperature: 0.7,
+        max_tokens: 1000,
+      });
+
+      const aiMessage = { role: 'assistant', content: completion.choices[0].message.content };
+      setChatMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error:', error);
+      const errorMessage = { role: 'assistant', content: 'Sorry, I encountered an error. Please check your connection and try again.' };
+      setChatMessages(prev => [...prev, errorMessage]);
+    }
   };
 
   // --- LIVE CHART CONFIGURATION ---
@@ -156,6 +198,9 @@ function App() {
           <button className={activeTab === 'analytics' ? 'active' : ''} onClick={() => setActiveTab('analytics')}>
             Analytics
           </button>
+          <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>
+            AI Chat
+          </button>
         </div>
       </header>
 
@@ -214,6 +259,33 @@ function App() {
             <h3>Live Environment History</h3>
             <div className="chart-wrapper">
               <Line data={chartData} options={chartOptions} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: AI CHAT */}
+      {activeTab === 'chat' && (
+        <div className="tab-content fade-in">
+          <div className="apple-card chat-container">
+            <h3>AI Assistant</h3>
+            <div className="chat-messages">
+              {chatMessages.map((msg, index) => (
+                <div key={index} className={`message ${msg.role}`}>
+                  <div className="message-content">{msg.content}</div>
+                </div>
+              ))}
+            </div>
+            <div className="chat-input-container">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Ask me anything about your smart farm..."
+                className="chat-input"
+              />
+              <button onClick={sendMessage} className="apple-btn send-btn">Send</button>
             </div>
           </div>
         </div>
