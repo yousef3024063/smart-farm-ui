@@ -10,13 +10,14 @@ import {
 // API Configuration from environment variables
 const apiBaseUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://localhost:1234/v1";
 const apiKey = import.meta.env.VITE_LM_STUDIO_API_KEY || "lm-studio";
-const modelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat"; // Update if your LM Studio model uses a different name
+const modelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 function App() {
   // --- STATE ---
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [appError, setAppError] = useState(null);
   // ADDED: humidity to the sensor state
   const [sensors, setSensors] = useState({ temp: 0, humidity: 0, moisture: 0, light: 0 });
   const [controls, setControls] = useState({
@@ -48,35 +49,40 @@ function App() {
 
   // --- FIREBASE LISTENERS ---
   useEffect(() => {
-    const sensorRef = ref(db, 'live_sensors');
-    const controlRef = ref(db, 'controls');
+    try {
+      const sensorRef = ref(db, 'live_sensors');
+      const controlRef = ref(db, 'controls');
 
-    const unsubscribeSensors = onValue(sensorRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        setSensors(data);
+      const unsubscribeSensors = onValue(sensorRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setSensors(data);
 
-        const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        
-        setHistory(prev => {
-          const newLabels = [...prev.labels, currentTime].slice(-15);
-          const newTemp = [...prev.temp, data.temp || 0].slice(-15);
-          const newHumidity = [...prev.humidity, data.humidity || 0].slice(-15); // Air Humidity
-          const newMoisture = [...prev.moisture, data.moisture || 0].slice(-15); // Soil Moisture
-          const newLight = [...prev.light, data.light || 0].slice(-15);
-          return { labels: newLabels, temp: newTemp, humidity: newHumidity, moisture: newMoisture, light: newLight };
-        });
-      }
-    });
+          const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          
+          setHistory(prev => {
+            const newLabels = [...prev.labels, currentTime].slice(-15);
+            const newTemp = [...prev.temp, data.temp || 0].slice(-15);
+            const newHumidity = [...prev.humidity, data.humidity || 0].slice(-15);
+            const newMoisture = [...prev.moisture, data.moisture || 0].slice(-15);
+            const newLight = [...prev.light, data.light || 0].slice(-15);
+            return { labels: newLabels, temp: newTemp, humidity: newHumidity, moisture: newMoisture, light: newLight };
+          });
+        }
+      });
 
-    const unsubscribeControls = onValue(controlRef, (snapshot) => {
-      if (snapshot.exists()) setControls(snapshot.val());
-    });
+      const unsubscribeControls = onValue(controlRef, (snapshot) => {
+        if (snapshot.exists()) setControls(snapshot.val());
+      });
 
-    return () => {
-      unsubscribeSensors();
-      unsubscribeControls();
-    };
+      return () => {
+        unsubscribeSensors();
+        unsubscribeControls();
+      };
+    } catch (error) {
+      console.error('Firebase error:', error);
+      setAppError(`Firebase connection error: ${error.message}`);
+    }
   }, []);
 
   // --- HARDWARE LOGIC ---
@@ -98,6 +104,7 @@ function App() {
     setChatInput('');
 
     try {
+      console.log('Sending to:', apiBaseUrl);
       const response = await fetch(`${apiBaseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -113,7 +120,7 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`AI request failed: ${response.status}`);
+        throw new Error(`AI request failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -121,8 +128,11 @@ function App() {
       const aiMessage = { role: 'assistant', content: aiText };
       setChatMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Error:', error);
-      const errorMessage = { role: 'assistant', content: 'Sorry, I encountered an error. Please check your connection and try again.' };
+      console.error('Chat Error:', error);
+      const errorMessage = { 
+        role: 'assistant', 
+        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running at ${apiBaseUrl}` 
+      };
       setChatMessages(prev => [...prev, errorMessage]);
     }
   };
@@ -195,6 +205,13 @@ function App() {
   return (
     <div className="apple-dashboard">
       
+      {/* ERROR DISPLAY */}
+      {appError && (
+        <div style={{ background: '#ff3b30', color: 'white', padding: '16px', borderRadius: '8px', margin: '16px', textAlign: 'center' }}>
+          <strong>⚠️ Error:</strong> {appError}
+        </div>
+      )}
+
       {/* HEADER & TABS */}
       <header className="app-header">
         <div className="header-titles">
