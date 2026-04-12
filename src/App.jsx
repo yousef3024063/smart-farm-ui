@@ -7,9 +7,10 @@ import {
   LineElement, Title, Tooltip, Legend
 } from 'chart.js';
 
-const apiBaseUrl = "https://unwitting-yong-aerogenically.ngrok-free.dev/v1";
-const apiKey = "lm-studio";
-const modelName = "llama-2-7b-chat"; // Update if your LM Studio model uses a different name
+// API Configuration from environment variables
+const apiBaseUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://localhost:1234/v1";
+const apiKey = import.meta.env.VITE_LM_STUDIO_API_KEY || "lm-studio";
+const modelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat"; // Update if your LM Studio model uses a different name
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
