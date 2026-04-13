@@ -53,29 +53,28 @@ function App() {
     const newAlerts = [];
     const timestamp = new Date().toLocaleTimeString();
 
-    // Temperature Logic (Normal: 10 - 30)
-    if (current.temp > 30 && prev.temp <= 30) {
-      newAlerts.push({ time: timestamp, type: 'warning', msg: `Temp increased to ${current.temp}°C! Ventilation fans activated.` });
-    } else if (current.temp <= 30 && prev.temp > 30) {
-      newAlerts.push({ time: timestamp, type: 'success', msg: `Temp normalized to ${current.temp}°C. Fans turned off.` });
-    } else if (current.temp < 10 && prev.temp >= 10) {
-      newAlerts.push({ time: timestamp, type: 'warning', msg: `Temp dropped to ${current.temp}°C! Tungsten lamp heating activated.` });
-    } else if (current.temp >= 10 && prev.temp < 10) {
-      newAlerts.push({ time: timestamp, type: 'success', msg: `Temp normalized to ${current.temp}°C. Tungsten lamp turned off.` });
+    // Sudden Temperature Shifts (Delta >= 10)
+    const tempDelta = current.temp - prev.temp;
+    if (tempDelta >= 10) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Sudden temperature rise (+${tempDelta.toFixed(1)}°C)! Ventilation fans activated.` });
+    } else if (tempDelta <= -10) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Sudden temperature drop (${tempDelta.toFixed(1)}°C). Returning to normal, fans turned off.` });
     }
 
-    // Moisture Logic (Normal: 30 - 70)
-    if (current.moisture < 30 && prev.moisture >= 30) {
-      newAlerts.push({ time: timestamp, type: 'warning', msg: `Soil moisture dropped to ${current.moisture}%! Water pump started.` });
-    } else if (current.moisture >= 30 && prev.moisture < 30) {
-      newAlerts.push({ time: timestamp, type: 'success', msg: `Soil moisture normalized to ${current.moisture}%. Water pump stopped.` });
+    // Sudden Moisture Shifts (Delta >= 15)
+    const moistureDelta = current.moisture - prev.moisture;
+    if (moistureDelta <= -15) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Sudden soil moisture drop (${moistureDelta.toFixed(1)}%)! Water pump started.` });
+    } else if (moistureDelta >= 15) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Soil moisture replenished (+${moistureDelta.toFixed(1)}%). Returning to normal, pump stopped.` });
     }
 
-    // Light Logic (Normal: > 20)
-    if (current.light < 20 && prev.light >= 20) {
-      newAlerts.push({ time: timestamp, type: 'warning', msg: `Light level dropped to ${current.light}%! Grow LEDs activated.` });
-    } else if (current.light >= 20 && prev.light < 20) {
-      newAlerts.push({ time: timestamp, type: 'success', msg: `Light level normalized to ${current.light}%. Grow LEDs turned off.` });
+    // Sudden Light Shifts (Delta >= 20)
+    const lightDelta = current.light - prev.light;
+    if (lightDelta <= -20) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Sudden light level drop (${lightDelta.toFixed(1)}%)! Grow LEDs activated.` });
+    } else if (lightDelta >= 20) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Light level restored (+${lightDelta.toFixed(1)}%). Returning to normal, LEDs turned off.` });
     }
 
     if (newAlerts.length > 0) {
@@ -309,7 +308,7 @@ function App() {
                       borderWidth: 2, tension: 0.4, fill: true,
                     }]
                   }} 
-                  options={getChartOptions('Celsius')} 
+                  options={getChartOptions('Celsius', 100)} 
                 />
               </div>
             </div>
