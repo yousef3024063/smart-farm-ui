@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from './firebase';
-import { ref, onValue, set } from 'firebase/database';
+import { ref, onValue, set, push, query, limitToLast } from 'firebase/database';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
@@ -81,7 +81,8 @@ function App() {
     }
 
     if (newAlerts.length > 0) {
-      setAlerts(prevAlerts => [...newAlerts, ...prevAlerts].slice(0, 50));
+      const logsRef = ref(db, 'activity_logs');
+      newAlerts.forEach(alert => push(logsRef, alert));
     }
 
     prevSensorsRef.current = current;
@@ -132,10 +133,22 @@ function App() {
         }
       });
 
+      const logsQuery = query(ref(db, 'activity_logs'), limitToLast(50));
+      const unsubscribeLogs = onValue(logsQuery, (snapshot) => {
+        if (snapshot.exists()) {
+          const logsData = snapshot.val();
+          const logsArray = Object.keys(logsData).sort().map(k => logsData[k]).reverse();
+          setAlerts(logsArray);
+        } else {
+          setAlerts([]);
+        }
+      });
+
       return () => {
         unsubscribeSensors();
         unsubscribeControls();
         unsubscribeEnv();
+        unsubscribeLogs();
       };
     } catch (error) {
       console.error('Firebase error:', error);
