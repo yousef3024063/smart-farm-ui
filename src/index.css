@@ -211,9 +211,21 @@ body {
   margin: 20px 0 0 0;
 }
 
-/* --- ANALYTICS CHART --- */
-.chart-container h3 { margin: 0 0 20px 0; font-weight: 600; }
-.chart-wrapper { height: 400px; width: 100%; }
+/* --- ANALYTICS CHARTS --- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 800px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-container h3 { margin: 0 0 16px 0; font-weight: 600; font-size: 16px; }
+.chart-wrapper { height: 250px; width: 100%; }
 
 /* --- AI CHAT --- */
 .chat-container h3 { margin: 0 0 20px 0; font-weight: 600; }

@@ -4,7 +4,7 @@ import { ref, onValue, set } from 'firebase/database';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
-  LineElement, Title, Tooltip, Legend
+  LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
 
 // API Configuration from environment variables
@@ -12,7 +12,7 @@ const apiBaseUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://localhost:1
 const apiKey = import.meta.env.VITE_LM_STUDIO_API_KEY || "lm-studio";
 const modelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 function App() {
   // --- STATE ---
@@ -133,58 +133,17 @@ function App() {
   };
 
   // --- LIVE CHART CONFIGURATION ---
-  const chartData = {
-    labels: history.labels,
-    datasets: [
-      {
-        label: 'Temp (°C)',
-        data: history.temp,
-        borderColor: '#ff3b30', // iOS Red
-        backgroundColor: 'rgba(255, 59, 48, 0.1)',
-        borderWidth: 2, tension: 0.4, yAxisID: 'yTemp',
-      },
-      {
-        label: 'Air Humidity (%)',
-        data: history.humidity,
-        borderColor: '#32ade6', // iOS Cyan
-        backgroundColor: 'rgba(50, 173, 230, 0.1)',
-        borderWidth: 2, tension: 0.4, yAxisID: 'yPercent',
-      },
-      {
-        label: 'Soil Moisture (%)',
-        data: history.moisture,
-        borderColor: '#30d158', // iOS Green
-        backgroundColor: 'rgba(48, 209, 88, 0.1)',
-        borderWidth: 2, tension: 0.4, yAxisID: 'yPercent',
-      },
-      {
-        label: 'Light Level (%)',
-        data: history.light,
-        borderColor: '#ffcc00', // iOS Yellow
-        backgroundColor: 'rgba(255, 204, 0, 0.1)',
-        borderWidth: 2, tension: 0.4, yAxisID: 'yPercent',
-      }
-    ],
-  };
-
-  const chartOptions = {
+  const getChartOptions = (yAxisTitle, maxVal) => ({
     responsive: true,
     maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     scales: {
-      yTemp: { 
+      y: { 
         type: 'linear', position: 'left', 
         grid: { color: 'rgba(255,255,255,0.05)' },
         ticks: { color: '#8e8e93' },
-        title: { display: true, text: 'Celsius', color: '#8e8e93' }
-      },
-      // Combined Y-axis for Humidity, Soil Moisture, and Light since they are all percentages
-      yPercent: { 
-        type: 'linear', position: 'right', 
-        grid: { drawOnChartArea: false },
-        ticks: { color: '#8e8e93' },
-        min: 0, max: 100,
-        title: { display: true, text: 'Percentage (%)', color: '#8e8e93' }
+        ...(maxVal ? { min: 0, max: maxVal } : {}),
+        title: { display: true, text: yAxisTitle, color: '#8e8e93' }
       },
       x: {
         grid: { color: 'rgba(255,255,255,0.05)' },
@@ -192,10 +151,10 @@ function App() {
       }
     },
     plugins: { 
-      legend: { labels: { color: '#ffffff', usePointStyle: true, boxWidth: 8 } },
+      legend: { display: false },
       tooltip: { backgroundColor: 'rgba(28, 28, 30, 0.9)', titleColor: '#fff', padding: 12, borderRadius: 12 }
     }
-  };
+  });
 
   return (
     <div className="apple-dashboard">
@@ -281,10 +240,81 @@ function App() {
       {/* TAB 2: ANALYTICS */}
       {activeTab === 'analytics' && (
         <div className="tab-content fade-in">
-          <div className="apple-card chart-container">
-            <h3>Live Environment History</h3>
-            <div className="chart-wrapper">
-              <Line data={chartData} options={chartOptions} />
+          <div className="charts-grid">
+            <div className="apple-card chart-container">
+              <h3>Air Temperature</h3>
+              <div className="chart-wrapper">
+                <Line 
+                  data={{
+                    labels: history.labels,
+                    datasets: [{
+                      label: 'Temp (°C)',
+                      data: history.temp,
+                      borderColor: '#ff3b30',
+                      backgroundColor: 'rgba(255, 59, 48, 0.1)',
+                      borderWidth: 2, tension: 0.4, fill: true,
+                    }]
+                  }} 
+                  options={getChartOptions('Celsius')} 
+                />
+              </div>
+            </div>
+            
+            <div className="apple-card chart-container">
+              <h3>Air Humidity</h3>
+              <div className="chart-wrapper">
+                <Line 
+                  data={{
+                    labels: history.labels,
+                    datasets: [{
+                      label: 'Air Humidity (%)',
+                      data: history.humidity,
+                      borderColor: '#32ade6',
+                      backgroundColor: 'rgba(50, 173, 230, 0.1)',
+                      borderWidth: 2, tension: 0.4, fill: true,
+                    }]
+                  }} 
+                  options={getChartOptions('Percentage (%)', 100)} 
+                />
+              </div>
+            </div>
+
+            <div className="apple-card chart-container">
+              <h3>Soil Moisture</h3>
+              <div className="chart-wrapper">
+                <Line 
+                  data={{
+                    labels: history.labels,
+                    datasets: [{
+                      label: 'Soil Moisture (%)',
+                      data: history.moisture,
+                      borderColor: '#30d158',
+                      backgroundColor: 'rgba(48, 209, 88, 0.1)',
+                      borderWidth: 2, tension: 0.4, fill: true,
+                    }]
+                  }} 
+                  options={getChartOptions('Percentage (%)', 100)} 
+                />
+              </div>
+            </div>
+
+            <div className="apple-card chart-container">
+              <h3>Light Level</h3>
+              <div className="chart-wrapper">
+                <Line 
+                  data={{
+                    labels: history.labels,
+                    datasets: [{
+                      label: 'Light Level (%)',
+                      data: history.light,
+                      borderColor: '#ffcc00',
+                      backgroundColor: 'rgba(255, 204, 0, 0.1)',
+                      borderWidth: 2, tension: 0.4, fill: true,
+                    }]
+                  }} 
+                  options={getChartOptions('Percentage (%)', 100)} 
+                />
+              </div>
             </div>
           </div>
         </div>
