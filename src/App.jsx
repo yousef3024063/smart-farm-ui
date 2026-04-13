@@ -272,6 +272,9 @@ function App() {
           <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
             Dashboard
           </button>
+          <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+            Profile
+          </button>
           <button className={activeTab === 'analytics' ? 'active' : ''} onClick={() => setActiveTab('analytics')}>
             Analytics
           </button>
@@ -315,53 +318,6 @@ function App() {
             </div>
           </div>
 
-          {/* CROP SELECTOR */}
-          <div className="apple-card crop-selector-card hover-effect" style={{ marginBottom: '24px' }}>
-            <div className="controls-header" style={{ marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontWeight: 600 }}>Target Environment Config</h3>
-              <div className="segmented-control" style={{ margin: 0 }}>
-                <button className={activeCrop === 'mushroom' ? 'active' : ''} onClick={() => handleCropChange('mushroom')}>
-                  🍄 Mushroom
-                </button>
-                <button className={activeCrop === 'lettuce' ? 'active' : ''} onClick={() => handleCropChange('lettuce')}>
-                  🥬 Lettuce
-                </button>
-              </div>
-            </div>
-            
-            {cropParams ? (
-              <div className="crop-params-grid" style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'minmax(120px, 180px) 1fr', 
-                gap: '12px', 
-                marginTop: '16px', 
-                fontSize: '14px',
-                background: 'rgba(0,0,0,0.2)',
-                padding: '16px',
-                borderRadius: '12px'
-              }}>
-                <div style={{ color: 'var(--text-muted)' }}>Temperature</div>
-                <div style={{ fontWeight: 500 }}>{cropParams.temperature}</div>
-                
-                <div style={{ color: 'var(--text-muted)' }}>Light (White LEDs)</div>
-                <div style={{ fontWeight: 500 }}>{cropParams.light}</div>
-                
-                <div style={{ color: 'var(--text-muted)' }}>Ambient Humidity</div>
-                <div style={{ fontWeight: 500 }}>{cropParams.humidity}</div>
-                
-                <div style={{ color: 'var(--text-muted)' }}>Root/Sub Moisture</div>
-                <div style={{ fontWeight: 500 }}>{cropParams.moisture}</div>
-
-                <div style={{ color: 'var(--text-muted)' }}>Gas Exchange</div>
-                <div style={{ fontWeight: 500 }}>{cropParams.gas}</div>
-              </div>
-            ) : (
-                <p style={{marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px'}}>
-                  Please select a crop profile above to sync the environment parameters with Firebase.
-                </p>
-            )}
-          </div>
-
           <div className="apple-card controls-section">
             <div className="controls-header">
               <h3>Hardware Overrides</h3>
@@ -386,7 +342,58 @@ function App() {
         </div>
       )}
 
-      {/* TAB 2: ANALYTICS */}
+      {/* TAB 2: PROFILE */}
+      {activeTab === 'profile' && (
+        <div className="tab-content fade-in">
+          <div className="apple-card crop-selector-card" style={{ marginBottom: '24px' }}>
+            <div className="controls-header" style={{ marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontWeight: 600 }}>Target Environment Config</h3>
+              <div className="segmented-control" style={{ margin: 0 }}>
+                <button className={activeCrop === 'mushroom' ? 'active' : ''} onClick={() => handleCropChange('mushroom')}>
+                  🍄 Mushroom
+                </button>
+                <button className={activeCrop === 'lettuce' ? 'active' : ''} onClick={() => handleCropChange('lettuce')}>
+                  🥬 Lettuce
+                </button>
+              </div>
+            </div>
+            
+            {cropParams ? (
+              <div className="crop-params-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'minmax(120px, 180px) 1fr', 
+                gap: '12px', 
+                marginTop: '16px', 
+                fontSize: '15px',
+                background: 'rgba(0,0,0,0.2)',
+                padding: '20px',
+                borderRadius: '12px'
+              }}>
+                <div style={{ color: 'var(--text-muted)' }}>Temperature</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.temperature}</div>
+                
+                <div style={{ color: 'var(--text-muted)' }}>Light (White LEDs)</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.light}</div>
+                
+                <div style={{ color: 'var(--text-muted)' }}>Ambient Humidity</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.humidity}</div>
+                
+                <div style={{ color: 'var(--text-muted)' }}>Root/Sub Moisture</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.moisture}</div>
+
+                <div style={{ color: 'var(--text-muted)' }}>Gas Exchange</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.gas}</div>
+              </div>
+            ) : (
+                <p style={{marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px'}}>
+                  Please select a crop profile above to sync the environment parameters with Firebase.
+                </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: ANALYTICS */}
       {activeTab === 'analytics' && (
         <div className="tab-content fade-in">
           <div className="charts-grid">
