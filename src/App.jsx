@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db } from './firebase';
 import { ref, onValue, set } from 'firebase/database';
 import { Line } from 'react-chartjs-2';
@@ -33,6 +33,57 @@ function App() {
   });
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
+  
+  const [alerts, setAlerts] = useState([]);
+  const prevSensorsRef = useRef({ temp: 0, humidity: 0, moisture: 0, light: 0 });
+  const isFirstLoadRef = useRef(true);
+
+  // Monitor sensor changes to generate alerts
+  useEffect(() => {
+    if (isFirstLoadRef.current) {
+      if (sensors.temp !== 0 || sensors.humidity !== 0 || sensors.moisture !== 0) {
+        isFirstLoadRef.current = false;
+        prevSensorsRef.current = sensors;
+      }
+      return;
+    }
+
+    const prev = prevSensorsRef.current;
+    const current = sensors;
+    const newAlerts = [];
+    const timestamp = new Date().toLocaleTimeString();
+
+    // Temperature Logic (Normal: 10 - 30)
+    if (current.temp > 30 && prev.temp <= 30) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Temp increased to ${current.temp}°C! Ventilation fans activated.` });
+    } else if (current.temp <= 30 && prev.temp > 30) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Temp normalized to ${current.temp}°C. Fans turned off.` });
+    } else if (current.temp < 10 && prev.temp >= 10) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Temp dropped to ${current.temp}°C! Tungsten lamp heating activated.` });
+    } else if (current.temp >= 10 && prev.temp < 10) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Temp normalized to ${current.temp}°C. Tungsten lamp turned off.` });
+    }
+
+    // Moisture Logic (Normal: 30 - 70)
+    if (current.moisture < 30 && prev.moisture >= 30) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Soil moisture dropped to ${current.moisture}%! Water pump started.` });
+    } else if (current.moisture >= 30 && prev.moisture < 30) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Soil moisture normalized to ${current.moisture}%. Water pump stopped.` });
+    }
+
+    // Light Logic (Normal: > 20)
+    if (current.light < 20 && prev.light >= 20) {
+      newAlerts.push({ time: timestamp, type: 'warning', msg: `Light level dropped to ${current.light}%! Grow LEDs activated.` });
+    } else if (current.light >= 20 && prev.light < 20) {
+      newAlerts.push({ time: timestamp, type: 'success', msg: `Light level normalized to ${current.light}%. Grow LEDs turned off.` });
+    }
+
+    if (newAlerts.length > 0) {
+      setAlerts(prevAlerts => [...newAlerts, ...prevAlerts].slice(0, 50));
+    }
+
+    prevSensorsRef.current = current;
+  }, [sensors]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -175,6 +226,9 @@ function App() {
           </button>
           <button className={activeTab === 'analytics' ? 'active' : ''} onClick={() => setActiveTab('analytics')}>
             Analytics
+          </button>
+          <button className={activeTab === 'alerts' ? 'active' : ''} onClick={() => setActiveTab('alerts')}>
+            Alerts
           </button>
           <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>
             AI Chat
@@ -320,7 +374,28 @@ function App() {
         </div>
       )}
 
-      {/* TAB 3: AI CHAT */}
+      {/* TAB 3: ALERTS */}
+      {activeTab === 'alerts' && (
+        <div className="tab-content fade-in">
+          <div className="apple-card alerts-container">
+            <h3>System Activity Log</h3>
+            {alerts.length === 0 ? (
+              <p className="no-alerts">No alerts at the moment. System operating normally.</p>
+            ) : (
+              <div className="alerts-list">
+                {alerts.map((alert, index) => (
+                  <div key={index} className={`alert-item ${alert.type}`}>
+                    <span className="alert-time">{alert.time}</span>
+                    <span className="alert-msg">{alert.msg}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: AI CHAT */}
       {activeTab === 'chat' && (
         <div className="tab-content fade-in">
           <div className="apple-card chat-container">
