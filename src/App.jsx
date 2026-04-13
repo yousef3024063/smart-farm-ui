@@ -34,6 +34,9 @@ function App() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   
+  const [activeCrop, setActiveCrop] = useState('mushroom');
+  const [cropParams, setCropParams] = useState(null);
+  
   const [alerts, setAlerts] = useState([]);
   const prevSensorsRef = useRef({ temp: 0, humidity: 0, moisture: 0, light: 0 });
   const isFirstLoadRef = useRef(true);
@@ -97,6 +100,7 @@ function App() {
     try {
       const sensorRef = ref(db, 'live_sensors');
       const controlRef = ref(db, 'controls');
+      const envRef = ref(db, 'env_settings');
 
       const unsubscribeSensors = onValue(sensorRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -120,9 +124,18 @@ function App() {
         if (snapshot.exists()) setControls(snapshot.val());
       });
 
+      const unsubscribeEnv = onValue(envRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.active_crop) setActiveCrop(data.active_crop);
+          if (data.parameters) setCropParams(data.parameters);
+        }
+      });
+
       return () => {
         unsubscribeSensors();
         unsubscribeControls();
+        unsubscribeEnv();
       };
     } catch (error) {
       console.error('Firebase error:', error);
@@ -130,13 +143,36 @@ function App() {
     }
   }, []);
 
-  // --- HARDWARE LOGIC ---
+  // --- HARDWARE & ENV LOGIC ---
   const toggleHardware = (key) => {
     const newValue = key === 'mode' 
       ? (controls.mode === 'AUTO' ? 'MANUAL' : 'AUTO') 
       : !controls[key];
     
     set(ref(db, `controls/${key}`), newValue);
+  };
+
+  const handleCropChange = (crop) => {
+    setActiveCrop(crop);
+    set(ref(db, 'env_settings/active_crop'), crop);
+    
+    if (crop === 'lettuce') {
+      set(ref(db, 'env_settings/parameters'), {
+        temperature: '16°C to 22°C (Ideal for vegetative growth; bolts > 24°C)',
+        light: 'High Intensity: 14 to 16 hours. Crucial for photosynthesis and biomass production.',
+        humidity: 'Moderate: 50% to 70% relative humidity. (Higher risks fungal disease on leaves).',
+        moisture: 'Moderate/High: Consistent moisture at the root zone, but must have good drainage.',
+        gas: 'High CO2 intake / High O2 output'
+      });
+    } else {
+      set(ref(db, 'env_settings/parameters'), {
+        temperature: '18°C to 22°C (Ideal for fruiting)',
+        light: 'Low Intensity: 10 to 12 hours. Used only as a directional signal for cap growth, not for energy.',
+        humidity: 'High: 85% to 95% relative humidity.',
+        moisture: 'High: 60% to 80% water content in the mycelial block.',
+        gas: 'High O2 intake / High CO2 output'
+      });
+    }
   };
 
   // --- AI CHAT LOGIC ---
@@ -264,6 +300,53 @@ function App() {
               <p className="card-label">Light Level</p>
               <h2>{sensors.light}%</h2>
             </div>
+          </div>
+
+          {/* CROP SELECTOR */}
+          <div className="apple-card crop-selector-card hover-effect" style={{ marginBottom: '24px' }}>
+            <div className="controls-header" style={{ marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontWeight: 600 }}>Target Environment Config</h3>
+              <div className="segmented-control" style={{ margin: 0 }}>
+                <button className={activeCrop === 'mushroom' ? 'active' : ''} onClick={() => handleCropChange('mushroom')}>
+                  🍄 Mushroom
+                </button>
+                <button className={activeCrop === 'lettuce' ? 'active' : ''} onClick={() => handleCropChange('lettuce')}>
+                  🥬 Lettuce
+                </button>
+              </div>
+            </div>
+            
+            {cropParams ? (
+              <div className="crop-params-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'minmax(120px, 180px) 1fr', 
+                gap: '12px', 
+                marginTop: '16px', 
+                fontSize: '14px',
+                background: 'rgba(0,0,0,0.2)',
+                padding: '16px',
+                borderRadius: '12px'
+              }}>
+                <div style={{ color: 'var(--text-muted)' }}>Temperature</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.temperature}</div>
+                
+                <div style={{ color: 'var(--text-muted)' }}>Light (White LEDs)</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.light}</div>
+                
+                <div style={{ color: 'var(--text-muted)' }}>Ambient Humidity</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.humidity}</div>
+                
+                <div style={{ color: 'var(--text-muted)' }}>Root/Sub Moisture</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.moisture}</div>
+
+                <div style={{ color: 'var(--text-muted)' }}>Gas Exchange</div>
+                <div style={{ fontWeight: 500 }}>{cropParams.gas}</div>
+              </div>
+            ) : (
+                <p style={{marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px'}}>
+                  Please select a crop profile above to sync the environment parameters with Firebase.
+                </p>
+            )}
           </div>
 
           <div className="apple-card controls-section">
