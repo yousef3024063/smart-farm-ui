@@ -33,10 +33,10 @@ function App() {
   });
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
-  
+
   const [activeCrop, setActiveCrop] = useState('mushroom');
   const [cropParams, setCropParams] = useState(null);
-  
+
   const [alerts, setAlerts] = useState([]);
   const prevSensorsRef = useRef({ temp: 0, humidity: 0, moisture: 0, light: 0 });
   const isFirstLoadRef = useRef(true);
@@ -109,7 +109,7 @@ function App() {
           setSensors(data);
 
           const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-          
+
           setHistory(prev => {
             const newLabels = [...prev.labels, currentTime].slice(-15);
             const newTemp = [...prev.temp, data.temp || 0].slice(-15);
@@ -158,17 +158,17 @@ function App() {
 
   // --- HARDWARE & ENV LOGIC ---
   const toggleHardware = (key) => {
-    const newValue = key === 'mode' 
-      ? (controls.mode === 'AUTO' ? 'MANUAL' : 'AUTO') 
+    const newValue = key === 'mode'
+      ? (controls.mode === 'AUTO' ? 'MANUAL' : 'AUTO')
       : !controls[key];
-    
+
     set(ref(db, `controls/${key}`), newValue);
   };
 
   const handleCropChange = (crop) => {
     setActiveCrop(crop);
     set(ref(db, 'env_settings/active_crop'), crop);
-    
+
     if (crop === 'lettuce') {
       set(ref(db, 'env_settings/parameters'), {
         temperature: '16°C to 22°C (Ideal for vegetative growth; bolts > 24°C)',
@@ -223,9 +223,9 @@ function App() {
       setChatMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Chat Error:', error);
-      const errorMessage = { 
-        role: 'assistant', 
-        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running at ${apiBaseUrl}` 
+      const errorMessage = {
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running at ${apiBaseUrl}`
       };
       setChatMessages(prev => [...prev, errorMessage]);
     }
@@ -237,8 +237,8 @@ function App() {
     maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     scales: {
-      y: { 
-        type: 'linear', position: 'left', 
+      y: {
+        type: 'linear', position: 'left',
         grid: { color: 'rgba(255,255,255,0.05)' },
         ticks: { color: '#8e8e93' },
         ...(maxVal ? { min: 0, max: maxVal } : {}),
@@ -249,7 +249,7 @@ function App() {
         ticks: { color: '#8e8e93', maxRotation: 45, minRotation: 45 }
       }
     },
-    plugins: { 
+    plugins: {
       legend: { display: false },
       tooltip: { backgroundColor: 'rgba(28, 28, 30, 0.9)', titleColor: '#fff', padding: 12, borderRadius: 12 }
     }
@@ -257,7 +257,7 @@ function App() {
 
   return (
     <div className="apple-dashboard">
-      
+
       {/* HEADER & TABS */}
       <header className="app-header">
         <div className="header-titles">
@@ -267,7 +267,7 @@ function App() {
             {controls.mode}
           </div>
         </div>
-        
+
         <div className="segmented-control">
           <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
             Dashboard
@@ -297,7 +297,7 @@ function App() {
       {/* TAB 1: DASHBOARD */}
       {activeTab === 'dashboard' && (
         <div className="tab-content fade-in">
-          
+
           {/* 4 SENSOR CARDS */}
           <div className="metrics-row">
             <div className="apple-card hover-effect">
@@ -325,7 +325,7 @@ function App() {
                 {controls.mode === 'AUTO' ? 'Switch to Manual' : 'Switch to Auto'}
               </button>
             </div>
-            
+
             <div className="hardware-grid">
               <button className={`apple-btn tungsten ${controls.tungsten ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('tungsten')}>Tungsten Lamp</button>
               <button className={`apple-btn white ${controls.whiteLED ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('whiteLED')}>White LED</button>
@@ -357,13 +357,13 @@ function App() {
                 </button>
               </div>
             </div>
-            
+
             {cropParams ? (
-              <div className="crop-params-grid" style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'minmax(120px, 180px) 1fr', 
-                gap: '12px', 
-                marginTop: '16px', 
+              <div className="crop-params-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(120px, 180px) 1fr',
+                gap: '12px',
+                marginTop: '16px',
                 fontSize: '15px',
                 background: 'rgba(0,0,0,0.2)',
                 padding: '20px',
@@ -371,13 +371,13 @@ function App() {
               }}>
                 <div style={{ color: 'var(--text-muted)' }}>Temperature</div>
                 <div style={{ fontWeight: 500 }}>{cropParams.temperature}</div>
-                
+
                 <div style={{ color: 'var(--text-muted)' }}>Light (White LEDs)</div>
                 <div style={{ fontWeight: 500 }}>{cropParams.light}</div>
-                
+
                 <div style={{ color: 'var(--text-muted)' }}>Ambient Humidity</div>
                 <div style={{ fontWeight: 500 }}>{cropParams.humidity}</div>
-                
+
                 <div style={{ color: 'var(--text-muted)' }}>Root/Sub Moisture</div>
                 <div style={{ fontWeight: 500 }}>{cropParams.moisture}</div>
 
@@ -385,9 +385,9 @@ function App() {
                 <div style={{ fontWeight: 500 }}>{cropParams.gas}</div>
               </div>
             ) : (
-                <p style={{marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px'}}>
-                  Please select a crop profile above to sync the environment parameters with Firebase.
-                </p>
+              <p style={{ marginTop: '16px', color: 'var(--text-muted)', fontSize: '14px' }}>
+                Please select a crop profile above to sync the environment parameters with Firebase.
+              </p>
             )}
           </div>
         </div>
@@ -400,7 +400,7 @@ function App() {
             <div className="apple-card chart-container">
               <h3>Air Temperature</h3>
               <div className="chart-wrapper">
-                <Line 
+                <Line
                   data={{
                     labels: history.labels,
                     datasets: [{
@@ -410,16 +410,16 @@ function App() {
                       backgroundColor: 'rgba(255, 59, 48, 0.1)',
                       borderWidth: 2, tension: 0.4, fill: true,
                     }]
-                  }} 
-                  options={getChartOptions('Celsius', 100)} 
+                  }}
+                  options={getChartOptions('Celsius', 100)}
                 />
               </div>
             </div>
-            
+
             <div className="apple-card chart-container">
               <h3>Air Humidity</h3>
               <div className="chart-wrapper">
-                <Line 
+                <Line
                   data={{
                     labels: history.labels,
                     datasets: [{
@@ -429,8 +429,8 @@ function App() {
                       backgroundColor: 'rgba(50, 173, 230, 0.1)',
                       borderWidth: 2, tension: 0.4, fill: true,
                     }]
-                  }} 
-                  options={getChartOptions('Percentage (%)', 100)} 
+                  }}
+                  options={getChartOptions('Percentage (%)', 100)}
                 />
               </div>
             </div>
@@ -438,7 +438,7 @@ function App() {
             <div className="apple-card chart-container">
               <h3>Soil Moisture</h3>
               <div className="chart-wrapper">
-                <Line 
+                <Line
                   data={{
                     labels: history.labels,
                     datasets: [{
@@ -448,8 +448,8 @@ function App() {
                       backgroundColor: 'rgba(48, 209, 88, 0.1)',
                       borderWidth: 2, tension: 0.4, fill: true,
                     }]
-                  }} 
-                  options={getChartOptions('Percentage (%)', 100)} 
+                  }}
+                  options={getChartOptions('Percentage (%)', 100)}
                 />
               </div>
             </div>
@@ -457,7 +457,7 @@ function App() {
             <div className="apple-card chart-container">
               <h3>Light Level</h3>
               <div className="chart-wrapper">
-                <Line 
+                <Line
                   data={{
                     labels: history.labels,
                     datasets: [{
@@ -467,8 +467,8 @@ function App() {
                       backgroundColor: 'rgba(255, 204, 0, 0.1)',
                       borderWidth: 2, tension: 0.4, fill: true,
                     }]
-                  }} 
-                  options={getChartOptions('Percentage (%)', 100)} 
+                  }}
+                  options={getChartOptions('Percentage (%)', 100)}
                 />
               </div>
             </div>

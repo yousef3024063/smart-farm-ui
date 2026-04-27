@@ -23,7 +23,8 @@ body {
 }
 
 .apple-dashboard {
-  max-width: 1000px; /* Slightly wider to fit 4 cards nicely */
+  max-width: 1000px;
+  /* Slightly wider to fit 4 cards nicely */
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -59,8 +60,15 @@ body {
   border-radius: 50%;
 }
 
-.status-indicator.AUTO .dot { background-color: var(--ios-green); box-shadow: 0 0 8px var(--ios-green); }
-.status-indicator.MANUAL .dot { background-color: var(--ios-orange); box-shadow: 0 0 8px var(--ios-orange); }
+.status-indicator.AUTO .dot {
+  background-color: var(--ios-green);
+  box-shadow: 0 0 8px var(--ios-green);
+}
+
+.status-indicator.MANUAL .dot {
+  background-color: var(--ios-orange);
+  box-shadow: 0 0 8px var(--ios-orange);
+}
 
 /* iOS Segmented Control */
 .segmented-control {
@@ -84,7 +92,7 @@ body {
 
 .segmented-control button.active {
   background: #636366;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
 }
 
 /* --- CARDS & LAYOUT --- */
@@ -133,7 +141,8 @@ body {
 
 .metrics-row h2 {
   margin: 0;
-  font-size: 36px; /* Slightly smaller to fit 4 across */
+  font-size: 36px;
+  /* Slightly smaller to fit 4 across */
   font-weight: 600;
   letter-spacing: -1px;
 }
@@ -146,7 +155,10 @@ body {
   margin-bottom: 24px;
 }
 
-.controls-header h3 { margin: 0; font-weight: 600; }
+.controls-header h3 {
+  margin: 0;
+  font-weight: 600;
+}
 
 .mode-toggle {
   background: #2c2c2e;
@@ -192,12 +204,41 @@ body {
 }
 
 /* Active States (Solid Apple Colors) */
-.apple-btn.tungsten.active { background: var(--ios-orange); border-color: var(--ios-orange); color: #000; }
-.apple-btn.white.active    { background: #ffffff; border-color: #ffffff; color: #000; }
-.apple-btn.blue.active     { background: var(--ios-blue); border-color: var(--ios-blue); color: #fff; }
-.apple-btn.red.active      { background: var(--ios-red); border-color: var(--ios-red); color: #fff; }
-.apple-btn.pump.active     { background: var(--ios-cyan); border-color: var(--ios-cyan); color: #fff; }
-.apple-btn.fan.active      { background: var(--ios-teal); border-color: var(--ios-teal); color: #fff; }
+.apple-btn.tungsten.active {
+  background: var(--ios-orange);
+  border-color: var(--ios-orange);
+  color: #000;
+}
+
+.apple-btn.white.active {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000;
+}
+
+.apple-btn.blue.active {
+  background: var(--ios-blue);
+  border-color: var(--ios-blue);
+  color: #fff;
+}
+
+.apple-btn.red.active {
+  background: var(--ios-red);
+  border-color: var(--ios-red);
+  color: #fff;
+}
+
+.apple-btn.pump.active {
+  background: var(--ios-cyan);
+  border-color: var(--ios-cyan);
+  color: #fff;
+}
+
+.apple-btn.fan.active {
+  background: var(--ios-teal);
+  border-color: var(--ios-teal);
+  color: #fff;
+}
 
 .apple-btn:disabled {
   opacity: 0.4;
@@ -224,11 +265,22 @@ body {
   }
 }
 
-.chart-container h3 { margin: 0 0 16px 0; font-weight: 600; font-size: 16px; }
-.chart-wrapper { height: 250px; width: 100%; }
+.chart-container h3 {
+  margin: 0 0 16px 0;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.chart-wrapper {
+  height: 250px;
+  width: 100%;
+}
 
 /* --- AI CHAT --- */
-.chat-container h3 { margin: 0 0 20px 0; font-weight: 600; }
+.chat-container h3 {
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
 
 .chat-messages {
   max-height: 400px;
@@ -302,7 +354,10 @@ body {
 }
 
 /* --- ALERTS TAB --- */
-.alerts-container h3 { margin: 0 0 20px 0; font-weight: 600; }
+.alerts-container h3 {
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
 
 .alerts-list {
   display: flex;
@@ -356,6 +411,13 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
