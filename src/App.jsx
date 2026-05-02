@@ -7,9 +7,7 @@ import {
   LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
 
-// API Configuration from environment variables
-const defaultApiUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://192.168.8.40:1234/v1";
-const apiKey = import.meta.env.VITE_LM_STUDIO_API_KEY || "lm-studio";
+// API Configuration
 const defaultModelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -18,7 +16,6 @@ function App() {
   // --- STATE ---
   const [activeTab, setActiveTab] = useState('dashboard');
   const [appError, setAppError] = useState(null);
-  const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('apiUrl') || defaultApiUrl);
   const [modelName, setModelName] = useState(() => localStorage.getItem('modelName') || defaultModelName);
   const [sensors, setSensors] = useState({ temp: 0, humidity: 0, moisture: 0, light: 0 });
   const [controls, setControls] = useState({
@@ -200,13 +197,11 @@ function App() {
     setChatInput('');
 
     try {
-      console.log('Sending to:', apiUrl);
-      const response = await fetch(`${apiUrl}/chat/completions`, {
+      console.log('Sending to Vercel API route: /api/chat');
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({
           model: modelName,
@@ -228,7 +223,7 @@ function App() {
       console.error('Chat Error:', error);
       const errorMessage = {
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running at ${apiUrl}`
+        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running on the local network.`
       };
       setChatMessages(prev => [...prev, errorMessage]);
     }
@@ -559,33 +554,12 @@ function App() {
       {activeTab === 'settings' && (
         <div className="tab-content fade-in">
           <div className="apple-card">
-            <h3>LM Studio Configuration</h3>
+            <h3>AI Configuration</h3>
             
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                API URL (ngrok tunnel):
-              </label>
-              <input
-                type="text"
-                value={apiUrl}
-                onChange={(e) => {
-                  setApiUrl(e.target.value);
-                  localStorage.setItem('apiUrl', e.target.value);
-                }}
-                placeholder="https://your-ngrok-url/v1"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: '#fff',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
-              />
-              <small style={{ display: 'block', marginTop: '8px', color: '#8e8e93' }}>
-                Enter your ngrok URL. Example: https://abc-123-def.ngrok.io/v1
+            <div style={{ marginBottom: '20px', padding: '16px', background: 'rgba(0,255,0,0.1)', borderRadius: '8px', borderLeft: '4px solid #30d158' }}>
+              <p style={{ margin: 0, color: '#30d158', fontSize: '14px', fontWeight: 500 }}>✓ Connected to LM Studio via Vercel API</p>
+              <small style={{ display: 'block', marginTop: '6px', color: '#8e8e93' }}>
+                No ngrok or external tunnels needed. All requests go through Vercel backend.
               </small>
             </div>
 
@@ -612,13 +586,14 @@ function App() {
                   boxSizing: 'border-box'
                 }}
               />
+              <small style={{ display: 'block', marginTop: '8px', color: '#8e8e93' }}>
+                Change the model name if using a different LM Studio model
+              </small>
             </div>
 
             <button
               onClick={() => {
-                localStorage.setItem('apiUrl', defaultApiUrl);
                 localStorage.setItem('modelName', defaultModelName);
-                setApiUrl(defaultApiUrl);
                 setModelName(defaultModelName);
               }}
               style={{
@@ -631,7 +606,7 @@ function App() {
                 fontSize: '14px'
               }}
             >
-              Reset to Defaults
+              Reset to Default Model
             </button>
           </div>
         </div>
