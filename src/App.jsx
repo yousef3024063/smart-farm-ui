@@ -24,7 +24,7 @@ function App() {
     tungsten: false,
     whiteLED: false,
     blueLED: false,
-    redLED: false,
+    minRange: false,
     waterPump: false,
     fans: false
   });
@@ -201,9 +201,9 @@ function App() {
       console.log('Sending to:', apiBaseUrl);
       const response = await fetch(`${apiBaseUrl}/chat/completions`, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           model: modelName,
@@ -318,6 +318,23 @@ function App() {
             </div>
           </div>
 
+          <div className="apple-card crop-selector-card" style={{ marginBottom: '24px' }}>
+            <div className="controls-header" style={{ marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontWeight: 600 }}>Environment Profile</h3>
+              <div className="segmented-control" style={{ margin: 0 }}>
+                <button className={activeCrop === 'mushroom' ? 'active' : ''} onClick={() => handleCropChange('mushroom')}>
+                  🍄 Mushroom
+                </button>
+                <button className={activeCrop === 'lettuce' ? 'active' : ''} onClick={() => handleCropChange('lettuce')}>
+                  🥬 Lettuce
+                </button>
+              </div>
+            </div>
+            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '14px' }}>
+               System Target: {activeCrop === 'mushroom' ? '18°C-22°C | 85-95% RH' : '16°C-22°C | 50-70% RH'}
+            </p>
+          </div>
+
           <div className="apple-card controls-section">
             <div className="controls-header">
               <h3>Hardware Overrides</h3>
@@ -330,13 +347,21 @@ function App() {
               <button className={`apple-btn tungsten ${controls.tungsten ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('tungsten')}>Tungsten Lamp</button>
               <button className={`apple-btn white ${controls.whiteLED ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('whiteLED')}>White LED</button>
               <button className={`apple-btn blue ${controls.blueLED ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('blueLED')}>Blue LED</button>
-              <button className={`apple-btn red ${controls.redLED ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('redLED')}>Red LED</button>
+              
+              <button 
+                 className={`apple-btn red ${controls.minRange ? 'active' : ''}`} 
+                 disabled={controls.mode === 'MANUAL'} 
+                 onClick={() => toggleHardware('minRange')}
+              >
+                Target Min Range
+              </button>
+              
               <button className={`apple-btn pump ${controls.waterPump ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('waterPump')}>Water Pump</button>
               <button className={`apple-btn fan ${controls.fans ? 'active' : ''}`} disabled={controls.mode === 'AUTO'} onClick={() => toggleHardware('fans')}>Ventilation Fans</button>
             </div>
 
             {controls.mode === 'AUTO' && (
-              <p className="lock-text">Controls are managed automatically by the system.</p>
+              <p className="lock-text">Manual Overrides disabled in AUTO. You can toggle "Target Min Range" to stay at the lowest temp/humidity bounds.</p>
             )}
           </div>
         </div>
