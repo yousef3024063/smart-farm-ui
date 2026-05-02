@@ -8,9 +8,9 @@ import {
 } from 'chart.js';
 
 // API Configuration from environment variables
-const apiBaseUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://localhost:1234/v1";
+const defaultApiUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://localhost:1234/v1";
 const apiKey = import.meta.env.VITE_LM_STUDIO_API_KEY || "lm-studio";
-const modelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat";
+const defaultModelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -18,6 +18,8 @@ function App() {
   // --- STATE ---
   const [activeTab, setActiveTab] = useState('dashboard');
   const [appError, setAppError] = useState(null);
+  const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('apiUrl') || defaultApiUrl);
+  const [modelName, setModelName] = useState(() => localStorage.getItem('modelName') || defaultModelName);
   const [sensors, setSensors] = useState({ temp: 0, humidity: 0, moisture: 0, light: 0 });
   const [controls, setControls] = useState({
     mode: 'AUTO',
@@ -198,8 +200,8 @@ function App() {
     setChatInput('');
 
     try {
-      console.log('Sending to:', apiBaseUrl);
-      const response = await fetch(`${apiBaseUrl}/chat/completions`, {
+      console.log('Sending to:', apiUrl);
+      const response = await fetch(`${apiUrl}/chat/completions`, {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -225,7 +227,7 @@ function App() {
       console.error('Chat Error:', error);
       const errorMessage = {
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running at ${apiBaseUrl}`
+        content: `Sorry, I encountered an error: ${error.message}. Make sure LM Studio is running at ${apiUrl}`
       };
       setChatMessages(prev => [...prev, errorMessage]);
     }
@@ -283,6 +285,9 @@ function App() {
           </button>
           <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>
             AI Chat
+          </button>
+          <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
+            Settings
           </button>
         </div>
       </header>
@@ -545,6 +550,88 @@ function App() {
               />
               <button onClick={sendMessage} className="apple-btn send-btn">Send</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: SETTINGS */}
+      {activeTab === 'settings' && (
+        <div className="tab-content fade-in">
+          <div className="apple-card">
+            <h3>LM Studio Configuration</h3>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+                API URL (ngrok tunnel):
+              </label>
+              <input
+                type="text"
+                value={apiUrl}
+                onChange={(e) => {
+                  setApiUrl(e.target.value);
+                  localStorage.setItem('apiUrl', e.target.value);
+                }}
+                placeholder="https://your-ngrok-url/v1"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <small style={{ display: 'block', marginTop: '8px', color: '#8e8e93' }}>
+                Enter your ngrok URL. Example: https://abc-123-def.ngrok.io/v1
+              </small>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
+                Model Name:
+              </label>
+              <input
+                type="text"
+                value={modelName}
+                onChange={(e) => {
+                  setModelName(e.target.value);
+                  localStorage.setItem('modelName', e.target.value);
+                }}
+                placeholder="llama-2-7b-chat"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                localStorage.setItem('apiUrl', defaultApiUrl);
+                localStorage.setItem('modelName', defaultModelName);
+                setApiUrl(defaultApiUrl);
+                setModelName(defaultModelName);
+              }}
+              style={{
+                padding: '10px 16px',
+                borderRadius: '8px',
+                background: '#8e8e93',
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Reset to Defaults
+            </button>
           </div>
         </div>
       )}
