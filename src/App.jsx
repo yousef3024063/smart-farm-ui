@@ -8,7 +8,7 @@ import {
 } from 'chart.js';
 
 // API Configuration from environment variables
-const defaultApiUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://localhost:1234/v1";
+const defaultApiUrl = import.meta.env.VITE_LM_STUDIO_API_URL || "http://192.168.8.40:1234/v1";
 const apiKey = import.meta.env.VITE_LM_STUDIO_API_KEY || "lm-studio";
 const defaultModelName = import.meta.env.VITE_LM_STUDIO_MODEL || "llama-2-7b-chat";
 
